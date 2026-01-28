@@ -320,6 +320,7 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gray-50/80 border-b">
+                                    <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase w-16">ID</th>
                                     <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tanggal</th>
                                     <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Kendaraan</th>
                                     <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rute</th>
@@ -331,7 +332,7 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                             <tbody className="divide-y divide-gray-100">
                                 {filtered.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-4 py-16 text-center">
+                                        <td colSpan={7} className="px-4 py-16 text-center">
                                             <div className="flex flex-col items-center">
                                                 <div className="p-3 bg-gray-100 rounded-full mb-3">
                                                     <Navigation className="w-8 h-8 text-gray-400" />
@@ -353,6 +354,9 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                                 ) : (
                                     paginatedData.map((item) => (
                                         <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-3 py-3">
+                                                <span className="text-xs font-mono text-gray-500">#{item.id}</span>
+                                            </td>
                                             <td className="px-3 py-3">
                                                 <span className="text-sm font-medium text-gray-900">{formatDate(item.tanggal_trip)}</span>
                                             </td>
