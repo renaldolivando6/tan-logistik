@@ -11,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Wallet, Filter, Download, Truck, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Wallet, Filter, Download, Truck } from 'lucide-react';
 
 interface Kendaraan {
     id: number;
@@ -25,27 +25,20 @@ interface Trip {
     kendaraan_id: number;
     nomor_polisi: string;
     jenis_kendaraan: string;
+    nama_asal: string | null;
+    nama_tujuan: string | null;
     uang_sangu: string;
-    total_biaya: string;
-    sisa_uang: string;
-    status: string;
-    status_uang_sangu: 'belum_selesai' | 'selesai';
-    uang_dikembalikan: string | null;
-    tanggal_pengembalian: string | null;
-    selisih_uang: string | null;
+    status: 'draft' | 'sedang_jalan' | 'selesai' | 'batal';
     catatan_trip: string | null;
-    catatan_pengembalian: string | null;
 }
 
 interface Summary {
     total_trip: number;
     total_uang_sangu: number;
-    total_biaya: number;
-    total_sisa: number;
-    total_dikembalikan: number;
-    total_selisih: number;
-    trip_belum_selesai: number;
+    trip_draft: number;
+    trip_sedang_jalan: number;
     trip_selesai: number;
+    trip_batal: number;
 }
 
 interface SummaryKendaraan {
@@ -54,8 +47,6 @@ interface SummaryKendaraan {
     jenis: string;
     total_trip: number;
     total_uang_sangu: number;
-    total_biaya: number;
-    total_sisa: number;
 }
 
 interface Props {
@@ -81,11 +72,16 @@ const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-const SanguStatusBadge = ({ status }: { status: 'belum_selesai' | 'selesai' }) => (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium
-        ${status === 'selesai' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-        {status === 'selesai' ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-        {status === 'selesai' ? 'Lunas' : 'Belum'}
+const STATUS_CONFIG = {
+    draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700' },
+    sedang_jalan: { label: 'Sedang Jalan', color: 'bg-blue-50 text-blue-700' },
+    selesai: { label: 'Selesai', color: 'bg-emerald-50 text-emerald-700' },
+    batal: { label: 'Batal', color: 'bg-red-50 text-red-700' },
+};
+
+const StatusBadge = ({ status }: { status: keyof typeof STATUS_CONFIG }) => (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_CONFIG[status].color}`}>
+        {STATUS_CONFIG[status].label}
     </span>
 );
 
@@ -111,16 +107,13 @@ export default function LaporanUangSangu({
     };
 
     const handleExport = () => {
-        const headers = ['Tanggal', 'Kendaraan', 'Uang Sangu', 'Total Biaya', 'Sisa', 'Dikembalikan', 'Selisih', 'Status'];
+        const headers = ['Tanggal', 'Kendaraan', 'Rute', 'Uang Sangu', 'Status'];
         const rows = trips.map(t => [
             t.tanggal_trip,
             t.nomor_polisi,
+            `${t.nama_asal || '-'} → ${t.nama_tujuan || '-'}`,
             t.uang_sangu,
-            t.total_biaya,
-            t.sisa_uang,
-            t.uang_dikembalikan || '',
-            t.selisih_uang || '',
-            t.status_uang_sangu === 'selesai' ? 'Lunas' : 'Belum'
+            STATUS_CONFIG[t.status].label
         ]);
 
         const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
@@ -133,7 +126,7 @@ export default function LaporanUangSangu({
     };
 
     const breadcrumbs = [
-        { title: 'Laporan', href: '#' },
+        { title: 'Laporan', href: route('dashboard') },
         { title: 'Rekap Uang Sangu', href: route('laporan.uang-sangu') },
     ];
 
@@ -150,7 +143,7 @@ export default function LaporanUangSangu({
                         </div>
                         <div>
                             <h1 className="text-xl font-semibold text-gray-900">Laporan Rekap Uang Sangu</h1>
-                            <p className="text-sm text-gray-500">Tracking uang sangu dan pengembalian</p>
+                            <p className="text-sm text-gray-500">Monitoring uang sangu per trip</p>
                         </div>
                     </div>
                     <Button onClick={handleExport} variant="outline" size="sm">
@@ -175,13 +168,15 @@ export default function LaporanUangSangu({
                             <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                         </div>
                         <div className="space-y-1.5">
-                            <Label className="text-sm">Status Sangu</Label>
+                            <Label className="text-sm">Status Trip</Label>
                             <Select value={status} onValueChange={setStatus}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Semua Status</SelectItem>
-                                    <SelectItem value="belum_selesai">Belum Selesai</SelectItem>
+                                    <SelectItem value="draft">Draft</SelectItem>
+                                    <SelectItem value="sedang_jalan">Sedang Jalan</SelectItem>
                                     <SelectItem value="selesai">Selesai</SelectItem>
+                                    <SelectItem value="batal">Batal</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -204,45 +199,28 @@ export default function LaporanUangSangu({
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     <div className="bg-gray-900 text-white rounded-xl p-4">
                         <p className="text-xs text-gray-400">Total Trip</p>
                         <p className="text-2xl font-bold">{summary.total_trip}</p>
-                        <div className="mt-2 flex gap-2 text-xs">
-                            <span className="text-emerald-400">{summary.trip_selesai} lunas</span>
-                            <span className="text-amber-400">{summary.trip_belum_selesai} pending</span>
-                        </div>
                     </div>
                     <div className="bg-violet-50 rounded-xl p-4">
                         <p className="text-xs text-violet-600">Total Uang Sangu</p>
-                        <p className="text-xl font-bold text-violet-700">{formatRupiah(summary.total_uang_sangu)}</p>
+                        <p className="text-lg font-bold text-violet-700">{formatRupiah(summary.total_uang_sangu)}</p>
                     </div>
-                    <div className="bg-rose-50 rounded-xl p-4">
-                        <p className="text-xs text-rose-600">Total Biaya</p>
-                        <p className="text-xl font-bold text-rose-700">{formatRupiah(summary.total_biaya)}</p>
+                    <div className="bg-blue-50 rounded-xl p-4">
+                        <p className="text-xs text-blue-600">Sedang Jalan</p>
+                        <p className="text-2xl font-bold text-blue-700">{summary.trip_sedang_jalan}</p>
                     </div>
                     <div className="bg-emerald-50 rounded-xl p-4">
-                        <p className="text-xs text-emerald-600">Total Sisa</p>
-                        <p className="text-xl font-bold text-emerald-700">{formatRupiah(summary.total_sisa)}</p>
+                        <p className="text-xs text-emerald-600">Selesai</p>
+                        <p className="text-2xl font-bold text-emerald-700">{summary.trip_selesai}</p>
+                    </div>
+                    <div className="bg-gray-100 rounded-xl p-4">
+                        <p className="text-xs text-gray-600">Draft</p>
+                        <p className="text-2xl font-bold text-gray-700">{summary.trip_draft}</p>
                     </div>
                 </div>
-
-                {/* Alert for pending */}
-                {summary.trip_belum_selesai > 0 && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
-                        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                        <div>
-                            <p className="font-medium text-amber-800">
-                                {summary.trip_belum_selesai} trip belum dikonfirmasi pengembalian uang sangu
-                            </p>
-                            <p className="text-sm text-amber-600">
-                                Total sisa yang harus dikembalikan: {formatRupiah(
-                                    trips.filter(t => t.status_uang_sangu === 'belum_selesai').reduce((sum, t) => sum + parseFloat(t.sisa_uang), 0)
-                                )}
-                            </p>
-                        </div>
-                    </div>
-                )}
 
                 {/* Summary per Kendaraan */}
                 {summaryPerKendaraan.length > 0 && (
@@ -263,15 +241,9 @@ export default function LaporanUangSangu({
                                             {item.total_trip} trip
                                         </span>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-2 text-sm">
-                                        <div>
-                                            <p className="text-gray-500">Sangu</p>
-                                            <p className="font-semibold">{formatRupiah(item.total_uang_sangu)}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-500">Biaya</p>
-                                            <p className="font-semibold">{formatRupiah(item.total_biaya)}</p>
-                                        </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500">Total Sangu</p>
+                                        <p className="text-lg font-bold text-gray-900">{formatRupiah(item.total_uang_sangu)}</p>
                                     </div>
                                 </div>
                             ))}
@@ -290,18 +262,15 @@ export default function LaporanUangSangu({
                                 <tr className="bg-gray-50/80 border-b">
                                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tanggal</th>
                                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Kendaraan</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rute</th>
                                     <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Uang Sangu</th>
-                                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase hidden sm:table-cell">Total Biaya</th>
-                                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Sisa</th>
-                                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase hidden md:table-cell">Dikembalikan</th>
-                                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase hidden md:table-cell">Selisih</th>
                                     <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {trips.length === 0 ? (
                                     <tr>
-                                        <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
+                                        <td colSpan={5} className="px-4 py-12 text-center text-gray-500">
                                             Tidak ada data untuk periode ini
                                         </td>
                                     </tr>
@@ -313,30 +282,26 @@ export default function LaporanUangSangu({
                                                 <div className="font-semibold text-gray-900">{trip.nomor_polisi}</div>
                                                 <div className="text-xs text-gray-500">{trip.jenis_kendaraan}</div>
                                             </td>
+                                            <td className="px-4 py-3 text-sm text-gray-900">
+                                                {trip.nama_asal || '-'} → {trip.nama_tujuan || '-'}
+                                            </td>
                                             <td className="px-4 py-3 text-right font-medium">{formatRupiah(trip.uang_sangu)}</td>
-                                            <td className="px-4 py-3 text-right text-sm hidden sm:table-cell">{formatRupiah(trip.total_biaya)}</td>
-                                            <td className="px-4 py-3 text-right">
-                                                <span className={`font-semibold ${parseFloat(trip.sisa_uang) < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                                                    {formatRupiah(trip.sisa_uang)}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-right text-sm hidden md:table-cell">
-                                                {formatRupiah(trip.uang_dikembalikan)}
-                                            </td>
-                                            <td className="px-4 py-3 text-right hidden md:table-cell">
-                                                {trip.selisih_uang !== null && (
-                                                    <span className={`text-sm font-medium ${parseFloat(trip.selisih_uang) < 0 ? 'text-red-600' : parseFloat(trip.selisih_uang) > 0 ? 'text-amber-600' : 'text-gray-600'}`}>
-                                                        {formatRupiah(trip.selisih_uang)}
-                                                    </span>
-                                                )}
-                                            </td>
                                             <td className="px-4 py-3 text-center">
-                                                <SanguStatusBadge status={trip.status_uang_sangu} />
+                                                <StatusBadge status={trip.status} />
                                             </td>
                                         </tr>
                                     ))
                                 )}
                             </tbody>
+                            {trips.length > 0 && (
+                                <tfoot>
+                                    <tr className="bg-gray-50 font-semibold">
+                                        <td colSpan={3} className="px-4 py-3 text-right">Total</td>
+                                        <td className="px-4 py-3 text-right text-lg">{formatRupiah(summary.total_uang_sangu)}</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            )}
                         </table>
                     </div>
                 </div>

@@ -8,7 +8,7 @@ import {
     FileBarChart,
     Wallet,
     Users,
-    FileCheck,
+    MapPin,
 } from 'lucide-react';
 
 import { NavMain } from '@/components/nav-main';
@@ -60,6 +60,11 @@ export function AppSidebar() {
                     href: route('kategori-biaya.index'),
                     icon: Tags,
                 },
+                {
+                    title: 'Lokasi',
+                    href: route('lokasi.index'),
+                    icon: MapPin,
+                },
             ],
         },
         {
@@ -71,14 +76,9 @@ export function AppSidebar() {
                     icon: Navigation,
                 },
                 {
-                    title: 'Biaya Operasional',
-                    href: route('biaya-operasional.index'),
+                    title: 'Biaya Maintenance',
+                    href: route('biaya-maintenance.index'),
                     icon: Receipt,
-                },
-                {
-                    title: 'Checklist Surat Jalan',
-                    href: route('checklist-surat-jalan.index'),
-                    icon: FileCheck,
                 },
             ],
         },
@@ -86,7 +86,7 @@ export function AppSidebar() {
             label: 'Laporan',
             items: [
                 {
-                    title: 'Biaya per Kendaraan',
+                    title: 'Laporan Biaya',
                     href: route('laporan.biaya-kendaraan'),
                     icon: FileBarChart,
                 },

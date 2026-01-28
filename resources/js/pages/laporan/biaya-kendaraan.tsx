@@ -11,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { FileBarChart, Filter, Download, Truck, Receipt, Fuel, Wrench, Building2 } from 'lucide-react';
+import { FileBarChart, Filter, Download, Truck, Receipt, Wrench, Building2 } from 'lucide-react';
 
 interface Kendaraan {
     id: number;
@@ -58,7 +58,6 @@ interface Props {
     summaryPerTipe: Record<string, { tipe: string; total: string }>;
     detail: BiayaDetail[];
     grandTotal: number;
-    biayaUmum: number;
 }
 
 const formatRupiah = (num: string | number) => {
@@ -71,7 +70,6 @@ const formatDate = (date: string) => {
 };
 
 const TIPE_CONFIG = {
-    trip: { label: 'Trip', color: 'bg-blue-50 text-blue-700', icon: Fuel },
     maintenance: { label: 'Maintenance', color: 'bg-amber-50 text-amber-700', icon: Wrench },
     umum: { label: 'Umum', color: 'bg-gray-100 text-gray-700', icon: Building2 },
 };
@@ -93,7 +91,6 @@ export default function LaporanBiayaKendaraan({
     summaryPerTipe,
     detail,
     grandTotal,
-    biayaUmum,
 }: Props) {
     const [startDate, setStartDate] = useState(filters.start_date);
     const [endDate, setEndDate] = useState(filters.end_date);
@@ -124,7 +121,6 @@ export default function LaporanBiayaKendaraan({
     };
 
     const handleExport = () => {
-        // Simple CSV export
         const headers = ['Tanggal', 'Kendaraan', 'Kategori', 'Tipe', 'Jumlah', 'Keterangan'];
         const rows = detail.map(d => [
             d.tanggal,
@@ -145,11 +141,10 @@ export default function LaporanBiayaKendaraan({
     };
 
     const breadcrumbs = [
-        { title: 'Laporan', href: '#' },
+        { title: 'Laporan', href: route('dashboard') },
         { title: 'Biaya per Kendaraan', href: route('laporan.biaya-kendaraan') },
     ];
 
-    const tripTotal = parseFloat(summaryPerTipe.trip?.total || '0');
     const maintenanceTotal = parseFloat(summaryPerTipe.maintenance?.total || '0');
     const umumTotal = parseFloat(summaryPerTipe.umum?.total || '0');
 
@@ -166,7 +161,7 @@ export default function LaporanBiayaKendaraan({
                         </div>
                         <div>
                             <h1 className="text-xl font-semibold text-gray-900">Laporan Biaya per Kendaraan</h1>
-                            <p className="text-sm text-gray-500">Analisis biaya operasional per armada</p>
+                            <p className="text-sm text-gray-500">Analisis biaya maintenance & operasional</p>
                         </div>
                     </div>
                     <Button onClick={handleExport} variant="outline" size="sm">
@@ -238,17 +233,10 @@ export default function LaporanBiayaKendaraan({
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div className="bg-gray-900 text-white rounded-xl p-4">
                         <p className="text-xs text-gray-400">Total Biaya</p>
                         <p className="text-xl font-bold">{formatRupiah(grandTotal)}</p>
-                    </div>
-                    <div className="bg-blue-50 rounded-xl p-4">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Fuel className="w-4 h-4 text-blue-600" />
-                            <p className="text-xs text-blue-600">Biaya Trip</p>
-                        </div>
-                        <p className="text-xl font-bold text-blue-700">{formatRupiah(tripTotal)}</p>
                     </div>
                     <div className="bg-amber-50 rounded-xl p-4">
                         <div className="flex items-center gap-2 mb-1">
@@ -266,7 +254,7 @@ export default function LaporanBiayaKendaraan({
                     </div>
                 </div>
 
-                {/* Summary per Kendaraan - Hide when showing biaya umum */}
+                {/* Summary per Kendaraan */}
                 {summaryPerKendaraan.length > 0 && !filters.show_umum && (
                     <div className="bg-white rounded-xl border p-4">
                         <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">

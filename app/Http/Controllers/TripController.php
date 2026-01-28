@@ -15,11 +15,15 @@ class TripController extends Controller
 
         $query = DB::table('trips')
             ->leftJoin('kendaraan', 'trips.kendaraan_id', '=', 'kendaraan.id')
+            ->leftJoin('lokasi as asal', 'trips.asal_id', '=', 'asal.id')
+            ->leftJoin('lokasi as tujuan', 'trips.tujuan_id', '=', 'tujuan.id')
             ->whereNull('trips.deleted_at')
             ->select(
                 'trips.*',
                 'kendaraan.nomor_polisi',
-                'kendaraan.jenis as jenis_kendaraan'
+                'kendaraan.jenis as jenis_kendaraan',
+                'asal.nama_kota as nama_asal',
+                'tujuan.nama_kota as nama_tujuan'
             );
 
         if ($startDate) {
@@ -40,9 +44,16 @@ class TripController extends Controller
             ->orderBy('nomor_polisi')
             ->get();
 
+        $lokasi = DB::table('lokasi')
+            ->whereNull('deleted_at')
+            ->where('status_aktif', true)
+            ->orderBy('nama_kota')
+            ->get();
+
         return Inertia::render('trip/index', [
             'trips' => $trips,
             'kendaraan' => $kendaraan,
+            'lokasi' => $lokasi,
             'filters' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
@@ -55,6 +66,8 @@ class TripController extends Controller
         $validated = $request->validate([
             'tanggal_trip' => 'required|date',
             'kendaraan_id' => 'required|exists:kendaraan,id',
+            'asal_id' => 'nullable|exists:lokasi,id',
+            'tujuan_id' => 'nullable|exists:lokasi,id',
             'uang_sangu' => 'required|numeric|min:0',
             'catatan_trip' => 'nullable|string',
         ]);
@@ -62,11 +75,10 @@ class TripController extends Controller
         DB::table('trips')->insert([
             'tanggal_trip' => $validated['tanggal_trip'],
             'kendaraan_id' => $validated['kendaraan_id'],
+            'asal_id' => $validated['asal_id'] ?? null,
+            'tujuan_id' => $validated['tujuan_id'] ?? null,
             'uang_sangu' => $validated['uang_sangu'],
-            'total_biaya' => 0,
-            'sisa_uang' => $validated['uang_sangu'],
             'status' => 'draft',
-            'status_uang_sangu' => 'belum_selesai',
             'catatan_trip' => $validated['catatan_trip'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
@@ -97,6 +109,8 @@ class TripController extends Controller
         $validated = $request->validate([
             'tanggal_trip' => 'required|date',
             'kendaraan_id' => 'required|exists:kendaraan,id',
+            'asal_id' => 'nullable|exists:lokasi,id',
+            'tujuan_id' => 'nullable|exists:lokasi,id',
             'uang_sangu' => 'required|numeric|min:0',
             'catatan_trip' => 'nullable|string',
         ]);
@@ -106,8 +120,9 @@ class TripController extends Controller
             ->update([
                 'tanggal_trip' => $validated['tanggal_trip'],
                 'kendaraan_id' => $validated['kendaraan_id'],
+                'asal_id' => $validated['asal_id'] ?? null,
+                'tujuan_id' => $validated['tujuan_id'] ?? null,
                 'uang_sangu' => $validated['uang_sangu'],
-                'sisa_uang' => $validated['uang_sangu'] - $trip->total_biaya,
                 'catatan_trip' => $validated['catatan_trip'] ?? null,
                 'updated_at' => now(),
             ]);
@@ -154,15 +169,15 @@ class TripController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:draft,berangkat,selesai,batal',
+            'status' => 'required|in:draft,sedang_jalan,selesai,batal',
         ]);
 
         $newStatus = $validated['status'];
 
         // Validate status transition
         $allowedTransitions = [
-            'draft' => ['berangkat', 'batal'],
-            'berangkat' => ['selesai', 'batal'],
+            'draft' => ['sedang_jalan', 'batal'],
+            'sedang_jalan' => ['selesai', 'batal'],
             'selesai' => [],
             'batal' => [],
         ];
@@ -181,46 +196,5 @@ class TripController extends Controller
 
         return redirect()->route('trip.index')
             ->with('success', 'Status trip berhasil diupdate');
-    }
-
-    // Konfirmasi pengembalian uang sangu
-    public function konfirmasiPengembalian(Request $request, $id)
-    {
-        $trip = DB::table('trips')
-            ->where('id', $id)
-            ->whereNull('deleted_at')
-            ->first();
-
-        if (!$trip) {
-            return redirect()->route('trip.index')
-                ->with('error', 'Trip tidak ditemukan');
-        }
-
-        if ($trip->status_uang_sangu === 'selesai') {
-            return redirect()->route('trip.index')
-                ->with('error', 'Uang sangu sudah dikonfirmasi sebelumnya');
-        }
-
-        $validated = $request->validate([
-            'uang_dikembalikan' => 'required|numeric|min:0',
-            'tanggal_pengembalian' => 'required|date',
-            'catatan_pengembalian' => 'nullable|string',
-        ]);
-
-        $selisih = $validated['uang_dikembalikan'] - $trip->sisa_uang;
-
-        DB::table('trips')
-            ->where('id', $id)
-            ->update([
-                'uang_dikembalikan' => $validated['uang_dikembalikan'],
-                'tanggal_pengembalian' => $validated['tanggal_pengembalian'],
-                'selisih_uang' => $selisih,
-                'catatan_pengembalian' => $validated['catatan_pengembalian'] ?? null,
-                'status_uang_sangu' => 'selesai',
-                'updated_at' => now(),
-            ]);
-
-        return redirect()->route('trip.index')
-            ->with('success', 'Pengembalian uang sangu berhasil dikonfirmasi');
     }
 }

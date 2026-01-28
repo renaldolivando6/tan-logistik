@@ -6,7 +6,7 @@ import { Truck, Navigation, Receipt, FileBarChart } from 'lucide-react';
 const quickLinks = [
     { title: 'Kendaraan', desc: 'Kelola armada', href: 'kendaraan.index', icon: Truck, color: 'bg-blue-50 text-blue-600' },
     { title: 'Trip', desc: 'Kelola perjalanan', href: 'trip.index', icon: Navigation, color: 'bg-indigo-50 text-indigo-600' },
-    { title: 'Biaya', desc: 'Catat pengeluaran', href: 'biaya-operasional.index', icon: Receipt, color: 'bg-rose-50 text-rose-600' },
+    { title: 'Biaya', desc: 'Catat pengeluaran', href: 'biaya-maintenance.index', icon: Receipt, color: 'bg-rose-50 text-rose-600' },
     { title: 'Laporan', desc: 'Lihat laporan', href: 'laporan.biaya-kendaraan', icon: FileBarChart, color: 'bg-emerald-50 text-emerald-600' },
 ];
 

@@ -22,7 +22,7 @@ import { Tags, Plus, Search, Eye, Pencil, Trash2 } from 'lucide-react';
 interface KategoriBiaya {
     id: number;
     nama: string;
-    tipe: 'trip' | 'maintenance' | 'umum';
+    tipe: 'maintenance' | 'umum';
     keterangan: string | null;
     status_aktif: boolean;
     created_at: string;
@@ -33,7 +33,6 @@ interface Props {
 }
 
 const TIPE_OPTIONS = [
-    { value: 'trip', label: 'Trip', color: 'bg-blue-50 text-blue-700 ring-blue-600/20' },
     { value: 'maintenance', label: 'Maintenance', color: 'bg-amber-50 text-amber-700 ring-amber-600/20' },
     { value: 'umum', label: 'Umum', color: 'bg-gray-50 text-gray-700 ring-gray-600/20' },
 ];
@@ -46,7 +45,6 @@ const getTipeLabel = (tipe: string) => {
     return TIPE_OPTIONS.find(t => t.value === tipe)?.label || tipe;
 };
 
-// Reusable Components
 const StatusBadge = ({ active }: { active: boolean }) => (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
         ${active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20' : 'bg-gray-50 text-gray-600 ring-1 ring-gray-500/20'}`}>
@@ -104,14 +102,14 @@ export default function KategoriBiayaIndex({ kategoriBiaya }: Props) {
 
     const createForm = useForm({
         nama: '',
-        tipe: 'trip' as 'trip' | 'maintenance' | 'umum',
+        tipe: 'maintenance' as 'maintenance' | 'umum',
         keterangan: '',
         status_aktif: true,
     });
 
     const editForm = useForm({
         nama: '',
-        tipe: 'trip' as 'trip' | 'maintenance' | 'umum',
+        tipe: 'maintenance' as 'maintenance' | 'umum',
         keterangan: '',
         status_aktif: true,
     });
@@ -122,13 +120,6 @@ export default function KategoriBiayaIndex({ kategoriBiaya }: Props) {
         const matchTipe = filterTipe === 'all' || item.tipe === filterTipe;
         return matchSearch && matchTipe;
     });
-
-    // Group by tipe for display
-    const groupedByTipe = {
-        trip: filtered.filter(i => i.tipe === 'trip'),
-        maintenance: filtered.filter(i => i.tipe === 'maintenance'),
-        umum: filtered.filter(i => i.tipe === 'umum'),
-    };
 
     const handleCreate = (e: React.FormEvent) => {
         e.preventDefault();
@@ -165,11 +156,15 @@ export default function KategoriBiayaIndex({ kategoriBiaya }: Props) {
     };
 
     const breadcrumbs = [
-        { title: 'Master Data', href: '#' },
+        { title: 'Master Data', href: route('dashboard') },
         { title: 'Kategori Biaya', href: route('kategori-biaya.index') },
     ];
 
-    const countByTipe = (tipe: string) => kategoriBiaya.filter(k => k.tipe === tipe).length;
+    const stats = {
+        total: kategoriBiaya.length,
+        maintenance: kategoriBiaya.filter(k => k.tipe === 'maintenance').length,
+        umum: kategoriBiaya.filter(k => k.tipe === 'umum').length,
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -195,17 +190,17 @@ export default function KategoriBiayaIndex({ kategoriBiaya }: Props) {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-blue-50 rounded-xl p-4">
-                        <p className="text-xs text-blue-600 font-medium">Trip</p>
-                        <p className="text-2xl font-bold text-blue-700">{countByTipe('trip')}</p>
+                    <div className="bg-gray-50 rounded-xl p-4">
+                        <p className="text-xs text-gray-500">Total</p>
+                        <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
                     </div>
                     <div className="bg-amber-50 rounded-xl p-4">
                         <p className="text-xs text-amber-600 font-medium">Maintenance</p>
-                        <p className="text-2xl font-bold text-amber-700">{countByTipe('maintenance')}</p>
+                        <p className="text-2xl font-bold text-amber-700">{stats.maintenance}</p>
                     </div>
                     <div className="bg-gray-100 rounded-xl p-4">
                         <p className="text-xs text-gray-600 font-medium">Umum</p>
-                        <p className="text-2xl font-bold text-gray-700">{countByTipe('umum')}</p>
+                        <p className="text-2xl font-bold text-gray-700">{stats.umum}</p>
                     </div>
                 </div>
 
@@ -226,7 +221,6 @@ export default function KategoriBiayaIndex({ kategoriBiaya }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">Semua Tipe</SelectItem>
-                            <SelectItem value="trip">Trip</SelectItem>
                             <SelectItem value="maintenance">Maintenance</SelectItem>
                             <SelectItem value="umum">Umum</SelectItem>
                         </SelectContent>
@@ -320,7 +314,7 @@ export default function KategoriBiayaIndex({ kategoriBiaya }: Props) {
                     <form onSubmit={handleCreate} className="space-y-5 mt-2">
                         <FormField label="Nama Kategori" required error={createForm.errors.nama}>
                             <Input
-                                placeholder="Contoh: Solar, Tol, Servis"
+                                placeholder="Contoh: Ganti Oli, Listrik, dll"
                                 value={createForm.data.nama}
                                 onChange={(e) => createForm.setData('nama', e.target.value)}
                             />
@@ -329,15 +323,14 @@ export default function KategoriBiayaIndex({ kategoriBiaya }: Props) {
                         <FormField label="Tipe" required error={createForm.errors.tipe}>
                             <Select
                                 value={createForm.data.tipe}
-                                onValueChange={(v) => createForm.setData('tipe', v as 'trip' | 'maintenance' | 'umum')}
+                                onValueChange={(v) => createForm.setData('tipe', v as 'maintenance' | 'umum')}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Pilih tipe" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="trip">Trip - Biaya perjalanan</SelectItem>
                                     <SelectItem value="maintenance">Maintenance - Perawatan kendaraan</SelectItem>
-                                    <SelectItem value="umum">Umum - Biaya overhead</SelectItem>
+                                    <SelectItem value="umum">Umum - Biaya operasional kantor</SelectItem>
                                 </SelectContent>
                             </Select>
                         </FormField>
@@ -391,15 +384,14 @@ export default function KategoriBiayaIndex({ kategoriBiaya }: Props) {
                         <FormField label="Tipe" required error={editForm.errors.tipe}>
                             <Select
                                 value={editForm.data.tipe}
-                                onValueChange={(v) => editForm.setData('tipe', v as 'trip' | 'maintenance' | 'umum')}
+                                onValueChange={(v) => editForm.setData('tipe', v as 'maintenance' | 'umum')}
                             >
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="trip">Trip - Biaya perjalanan</SelectItem>
                                     <SelectItem value="maintenance">Maintenance - Perawatan kendaraan</SelectItem>
-                                    <SelectItem value="umum">Umum - Biaya overhead</SelectItem>
+                                    <SelectItem value="umum">Umum - Biaya operasional kantor</SelectItem>
                                 </SelectContent>
                             </Select>
                         </FormField>

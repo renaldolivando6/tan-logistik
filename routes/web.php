@@ -6,10 +6,10 @@ use Laravel\Fortify\Features;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\KategoriBiayaController;
 use App\Http\Controllers\TripController;
-use App\Http\Controllers\BiayaOperasionalController;
+use App\Http\Controllers\BiayaMaintenanceController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\ChecklistSuratJalanController;
+use App\Http\Controllers\LokasiController;
 
 // Public Routes
 Route::get('/', function () {
@@ -49,24 +49,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{id}', [TripController::class, 'update'])->name('update');
         Route::delete('/{id}', [TripController::class, 'destroy'])->name('destroy');
         Route::patch('/{id}/status', [TripController::class, 'updateStatus'])->name('update-status');
-        Route::post('/{id}/konfirmasi-pengembalian', [TripController::class, 'konfirmasiPengembalian'])->name('konfirmasi-pengembalian');
     });
 
-    // Biaya Operasional Routes
-    Route::prefix('biaya-operasional')->name('biaya-operasional.')->group(function () {
-        Route::get('/', [BiayaOperasionalController::class, 'index'])->name('index');
-        Route::post('/', [BiayaOperasionalController::class, 'store'])->name('store');
-        Route::put('/{id}', [BiayaOperasionalController::class, 'update'])->name('update');
-        Route::delete('/{id}', [BiayaOperasionalController::class, 'destroy'])->name('destroy');
-    });
-
-    // Checklist Surat Jalan Routes
-    Route::prefix('checklist-surat-jalan')->name('checklist-surat-jalan.')->group(function () {
-        Route::get('/', [ChecklistSuratJalanController::class, 'index'])->name('index');
-        Route::post('/', [ChecklistSuratJalanController::class, 'store'])->name('store');
-        Route::put('/{id}', [ChecklistSuratJalanController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ChecklistSuratJalanController::class, 'destroy'])->name('destroy');
-        Route::post('/{id}/toggle-checklist', [ChecklistSuratJalanController::class, 'toggleChecklist'])->name('toggle-checklist');
+    // Biaya Maintenance Routes (rename dari biaya-operasional)
+    Route::prefix('biaya-maintenance')->name('biaya-maintenance.')->group(function () {
+        Route::get('/', [BiayaMaintenanceController::class, 'index'])->name('index');
+        Route::post('/', [BiayaMaintenanceController::class, 'store'])->name('store');
+        Route::put('/{id}', [BiayaMaintenanceController::class, 'update'])->name('update');
+        Route::delete('/{id}', [BiayaMaintenanceController::class, 'destroy'])->name('destroy');
     });
 
     // Laporan Routes
@@ -81,6 +71,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [UserController::class, 'store'])->name('store');
         Route::put('/{id}', [UserController::class, 'update'])->name('update');
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
+    });
+
+    // Lokasi Routes
+    Route::prefix('lokasi')->name('lokasi.')->group(function () {
+        Route::get('/', [LokasiController::class, 'index'])->name('index');
+        Route::post('/', [LokasiController::class, 'store'])->name('store');
+        Route::put('/{id}', [LokasiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [LokasiController::class, 'destroy'])->name('destroy');
     });
 });
 
