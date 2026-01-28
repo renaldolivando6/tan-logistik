@@ -49,7 +49,7 @@ export default function Dashboard() {
 
                 {/* Welcome */}
                 <div className="text-center">
-                    <h1 className="text-xl font-semibold text-gray-900">Selamat Datang 👋</h1>
+                    <h1 className="text-xl font-semibold text-gray-900">Selamat Datang</h1>
                     <p className="text-gray-500 text-sm mt-1">Sistem Manajemen Operasional PT. Trans Anugerah Nusa</p>
                 </div>
 
