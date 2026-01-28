@@ -10,6 +10,7 @@ use App\Http\Controllers\BiayaMaintenanceController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LokasiController;
+use App\Http\Controllers\OwnerController;
 
 // Public Routes
 Route::get('/', function () {
@@ -79,6 +80,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [LokasiController::class, 'store'])->name('store');
         Route::put('/{id}', [LokasiController::class, 'update'])->name('update');
         Route::delete('/{id}', [LokasiController::class, 'destroy'])->name('destroy');
+    });
+
+    // Owner Routes
+    Route::prefix('owner')->name('owner.')->group(function () {
+        Route::get('/trip-status-override', [OwnerController::class, 'tripStatusOverride'])->name('trip-status-override');
+        Route::patch('/trip-status-override', [OwnerController::class, 'updateTripStatus'])->name('update-trip-status');
     });
 });
 

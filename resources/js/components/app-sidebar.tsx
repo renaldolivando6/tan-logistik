@@ -9,6 +9,7 @@ import {
     Wallet,
     Users,
     MapPin,
+    Shield,
 } from 'lucide-react';
 
 import { NavMain } from '@/components/nav-main';
@@ -105,6 +106,11 @@ export function AppSidebar() {
                     title: 'Manajemen User',
                     href: route('users.index'),
                     icon: Users,
+                },
+                {
+                    title: 'Owner Menu',
+                    href: route('owner.trip-status-override'),
+                    icon: Shield,
                 },
             ],
         }] : []),
