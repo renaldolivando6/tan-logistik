@@ -11,6 +11,7 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LokasiController;
 use App\Http\Controllers\OwnerController;
+use App\Http\Controllers\PelangganController;
 
 // Public Routes
 Route::get('/', function () {
@@ -82,11 +83,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}', [LokasiController::class, 'destroy'])->name('destroy');
     });
 
+    // Pelanggan Routes
+    Route::prefix('pelanggan')->name('pelanggan.')->group(function () {
+        Route::get('/', [PelangganController::class, 'index'])->name('index');
+        Route::post('/', [PelangganController::class, 'store'])->name('store');
+        Route::put('/{id}', [PelangganController::class, 'update'])->name('update');
+        Route::delete('/{id}', [PelangganController::class, 'destroy'])->name('destroy');
+    });
+
     // Owner Routes
     Route::prefix('owner')->name('owner.')->group(function () {
         Route::get('/trip-status-override', [OwnerController::class, 'tripStatusOverride'])->name('trip-status-override');
         Route::patch('/trip-status-override', [OwnerController::class, 'updateTripStatus'])->name('update-trip-status');
     });
+
 });
 
 require __DIR__.'/settings.php';

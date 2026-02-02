@@ -15,6 +15,7 @@ class TripController extends Controller
 
         $query = DB::table('trips')
             ->leftJoin('kendaraan', 'trips.kendaraan_id', '=', 'kendaraan.id')
+            ->leftJoin('pelanggan', 'trips.pelanggan_id', '=', 'pelanggan.id')
             ->leftJoin('lokasi as asal', 'trips.asal_id', '=', 'asal.id')
             ->leftJoin('lokasi as tujuan', 'trips.tujuan_id', '=', 'tujuan.id')
             ->whereNull('trips.deleted_at')
@@ -22,6 +23,7 @@ class TripController extends Controller
                 'trips.*',
                 'kendaraan.nomor_polisi',
                 'kendaraan.jenis as jenis_kendaraan',
+                'pelanggan.nama as nama_pelanggan',
                 'asal.nama_kota as nama_asal',
                 'tujuan.nama_kota as nama_tujuan'
             );
@@ -50,10 +52,17 @@ class TripController extends Controller
             ->orderBy('nama_kota')
             ->get();
 
+        $pelanggan = DB::table('pelanggan')
+            ->whereNull('deleted_at')
+            ->where('status_aktif', true)
+            ->orderBy('nama')
+            ->get();
+
         return Inertia::render('trip/index', [
             'trips' => $trips,
             'kendaraan' => $kendaraan,
             'lokasi' => $lokasi,
+            'pelanggan' => $pelanggan,
             'filters' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
@@ -66,6 +75,7 @@ class TripController extends Controller
         $validated = $request->validate([
             'tanggal_trip' => 'required|date',
             'kendaraan_id' => 'required|exists:kendaraan,id',
+            'pelanggan_id' => 'required|exists:pelanggan,id',
             'asal_id' => 'nullable|exists:lokasi,id',
             'tujuan_id' => 'nullable|exists:lokasi,id',
             'uang_sangu' => 'required|numeric|min:0',
@@ -75,6 +85,7 @@ class TripController extends Controller
         DB::table('trips')->insert([
             'tanggal_trip' => $validated['tanggal_trip'],
             'kendaraan_id' => $validated['kendaraan_id'],
+            'pelanggan_id' => $validated['pelanggan_id'],
             'asal_id' => $validated['asal_id'] ?? null,
             'tujuan_id' => $validated['tujuan_id'] ?? null,
             'uang_sangu' => $validated['uang_sangu'],
@@ -109,6 +120,7 @@ class TripController extends Controller
         $validated = $request->validate([
             'tanggal_trip' => 'required|date',
             'kendaraan_id' => 'required|exists:kendaraan,id',
+            'pelanggan_id' => 'required|exists:pelanggan,id',
             'asal_id' => 'nullable|exists:lokasi,id',
             'tujuan_id' => 'nullable|exists:lokasi,id',
             'uang_sangu' => 'required|numeric|min:0',
@@ -120,6 +132,7 @@ class TripController extends Controller
             ->update([
                 'tanggal_trip' => $validated['tanggal_trip'],
                 'kendaraan_id' => $validated['kendaraan_id'],
+                'pelanggan_id' => $validated['pelanggan_id'],
                 'asal_id' => $validated['asal_id'] ?? null,
                 'tujuan_id' => $validated['tujuan_id'] ?? null,
                 'uang_sangu' => $validated['uang_sangu'],

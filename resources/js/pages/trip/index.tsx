@@ -31,12 +31,20 @@ interface Lokasi {
     status_aktif: boolean;
 }
 
+interface Pelanggan {
+    id: number;
+    nama: string;
+    status_aktif: boolean;
+}
+
 interface Trip {
     id: number;
     tanggal_trip: string;
     kendaraan_id: number;
+    pelanggan_id: number;
     nomor_polisi: string;
     jenis_kendaraan: string;
+    nama_pelanggan: string;
     asal_id: number | null;
     tujuan_id: number | null;
     nama_asal: string | null;
@@ -51,6 +59,7 @@ interface Props {
     trips: Trip[];
     kendaraan: Kendaraan[];
     lokasi: Lokasi[];
+    pelanggan: Pelanggan[];
     filters?: {
         start_date?: string;
         end_date?: string;
@@ -121,7 +130,7 @@ const FormField = ({ label, required, error, children }: {
 
 const ITEMS_PER_PAGE = 10;
 
-export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) {
+export default function TripIndex({ trips, kendaraan, lokasi, pelanggan, filters }: Props) {
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [startDate, setStartDate] = useState(filters?.start_date || '');
@@ -134,6 +143,7 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
     const createForm = useForm({
         tanggal_trip: new Date().toISOString().split('T')[0],
         kendaraan_id: '',
+        pelanggan_id: '',
         asal_id: '',
         tujuan_id: '',
         uang_sangu: '',
@@ -143,6 +153,7 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
     const editForm = useForm({
         tanggal_trip: '',
         kendaraan_id: '',
+        pelanggan_id: '',
         asal_id: '',
         tujuan_id: '',
         uang_sangu: '',
@@ -152,6 +163,7 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
     const filtered = useMemo(() => {
         return trips.filter((item) => {
             const matchSearch = item.nomor_polisi?.toLowerCase().includes(search.toLowerCase()) ||
+                item.nama_pelanggan?.toLowerCase().includes(search.toLowerCase()) ||
                 item.nama_asal?.toLowerCase().includes(search.toLowerCase()) ||
                 item.nama_tujuan?.toLowerCase().includes(search.toLowerCase()) ||
                 item.catatan_trip?.toLowerCase().includes(search.toLowerCase());
@@ -182,6 +194,7 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
         editForm.setData({
             tanggal_trip: t.tanggal_trip,
             kendaraan_id: t.kendaraan_id.toString(),
+            pelanggan_id: t.pelanggan_id.toString(),
             asal_id: t.asal_id?.toString() || '',
             tujuan_id: t.tujuan_id?.toString() || '',
             uang_sangu: t.uang_sangu,
@@ -232,7 +245,6 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
             <Head title="Trip" />
 
             <div className="p-4 sm:p-6 space-y-6">
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 bg-indigo-50 rounded-xl">
@@ -249,7 +261,6 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                     </Button>
                 </div>
 
-                {/* Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="bg-gray-50 rounded-xl p-4">
                         <p className="text-xs text-gray-500">Total Trip</p>
@@ -269,7 +280,6 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                     </div>
                 </div>
 
-                {/* Filter Periode */}
                 <div className="bg-white rounded-xl border p-4">
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <div className="space-y-1">
@@ -289,12 +299,11 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                     </div>
                 </div>
 
-                {/* Search & Filter */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <div className="relative flex-1 max-w-md">
                         <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                         <Input
-                            placeholder="Cari nomor polisi, asal, tujuan..."
+                            placeholder="Cari plat, pelanggan, rute..."
                             value={search}
                             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                             className="pl-10"
@@ -314,7 +323,6 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                     </Select>
                 </div>
 
-                {/* Table */}
                 <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
@@ -323,6 +331,7 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                                     <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase w-16">ID</th>
                                     <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tanggal</th>
                                     <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Kendaraan</th>
+                                    <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pelanggan</th>
                                     <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rute</th>
                                     <th className="px-3 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Uang Sangu</th>
                                     <th className="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
@@ -332,7 +341,7 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                             <tbody className="divide-y divide-gray-100">
                                 {filtered.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-4 py-16 text-center">
+                                        <td colSpan={8} className="px-4 py-16 text-center">
                                             <div className="flex flex-col items-center">
                                                 <div className="p-3 bg-gray-100 rounded-full mb-3">
                                                     <Navigation className="w-8 h-8 text-gray-400" />
@@ -363,6 +372,9 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                                             <td className="px-3 py-3">
                                                 <div className="font-semibold text-gray-900 text-sm">{item.nomor_polisi}</div>
                                                 <div className="text-xs text-gray-500">{item.jenis_kendaraan}</div>
+                                            </td>
+                                            <td className="px-3 py-3">
+                                                <span className="text-sm text-gray-900">{item.nama_pelanggan}</span>
                                             </td>
                                             <td className="px-3 py-3">
                                                 <div className="text-sm text-gray-900">
@@ -399,7 +411,6 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                         </table>
                     </div>
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
                         <div className="flex items-center justify-between px-4 py-3 border-t">
                             <p className="text-sm text-gray-500">
@@ -431,13 +442,12 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                 </div>
             </div>
 
-            {/* Create Modal */}
             <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Tambah Trip Baru</DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleCreate} className="space-y-5 mt-2">
+                    <div className="space-y-5 mt-2">
                         <FormField label="Tanggal Trip" required error={createForm.errors.tanggal_trip}>
                             <Input
                                 type="date"
@@ -455,6 +465,21 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                                     {kendaraan.map((k) => (
                                         <SelectItem key={k.id} value={k.id.toString()}>
                                             {k.nomor_polisi} - {k.jenis}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </FormField>
+
+                        <FormField label="Pelanggan" required error={createForm.errors.pelanggan_id}>
+                            <Select value={createForm.data.pelanggan_id} onValueChange={(v) => createForm.setData('pelanggan_id', v)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih pelanggan" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {pelanggan.map((p) => (
+                                        <SelectItem key={p.id} value={p.id.toString()}>
+                                            {p.nama}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -516,21 +541,20 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
 
                         <div className="flex gap-3 pt-2">
                             <Button type="button" variant="outline" className="flex-1" onClick={() => setCreateModalOpen(false)}>Batal</Button>
-                            <Button type="submit" className="flex-1" disabled={createForm.processing}>
+                            <Button className="flex-1" disabled={createForm.processing} onClick={handleCreate}>
                                 {createForm.processing ? 'Menyimpan...' : 'Simpan'}
                             </Button>
                         </div>
-                    </form>
+                    </div>
                 </DialogContent>
             </Dialog>
 
-            {/* Edit Modal */}
             <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Edit Trip</DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleUpdate} className="space-y-5 mt-2">
+                    <div className="space-y-5 mt-2">
                         <FormField label="Tanggal Trip" required>
                             <Input type="date" value={editForm.data.tanggal_trip} onChange={(e) => editForm.setData('tanggal_trip', e.target.value)} />
                         </FormField>
@@ -541,6 +565,17 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
                                 <SelectContent>
                                     {kendaraan.map((k) => (
                                         <SelectItem key={k.id} value={k.id.toString()}>{k.nomor_polisi} - {k.jenis}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </FormField>
+
+                        <FormField label="Pelanggan" required>
+                            <Select value={editForm.data.pelanggan_id} onValueChange={(v) => editForm.setData('pelanggan_id', v)}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {pelanggan.map((p) => (
+                                        <SelectItem key={p.id} value={p.id.toString()}>{p.nama}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -583,9 +618,9 @@ export default function TripIndex({ trips, kendaraan, lokasi, filters }: Props) 
 
                         <div className="flex gap-3 pt-2">
                             <Button type="button" variant="outline" className="flex-1" onClick={() => setEditModalOpen(false)}>Batal</Button>
-                            <Button type="submit" className="flex-1" disabled={editForm.processing}>{editForm.processing ? 'Menyimpan...' : 'Update'}</Button>
+                            <Button className="flex-1" disabled={editForm.processing} onClick={handleUpdate}>{editForm.processing ? 'Menyimpan...' : 'Update'}</Button>
                         </div>
-                    </form>
+                    </div>
                 </DialogContent>
             </Dialog>
         </AppLayout>

@@ -62,6 +62,11 @@ export function AppSidebar() {
                     icon: Tags,
                 },
                 {
+                    title: 'Pelanggan',
+                    href: route('pelanggan.index'),
+                    icon: Users,
+                },
+                {
                     title: 'Lokasi',
                     href: route('lokasi.index'),
                     icon: MapPin,
