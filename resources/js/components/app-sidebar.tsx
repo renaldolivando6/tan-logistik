@@ -27,7 +27,6 @@ import { type NavItem, type SharedData } from '@/types';
 
 import AppLogo from './app-logo';
 
-// Grouped navigation structure
 export interface NavGroup {
     label: string;
     items: NavItem[];
@@ -103,7 +102,6 @@ export function AppSidebar() {
                 },
             ],
         },
-        // Menu khusus Owner (hanya muncul jika user id = 1)
         ...(isOwner ? [{
             label: 'Pengaturan',
             items: [
@@ -123,10 +121,15 @@ export function AppSidebar() {
 
     return (
         <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+            {/* Header: oranye terang atas */}
+            <SidebarHeader className="tan-sidebar-header">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
+                        <SidebarMenuButton
+                            size="lg"
+                            asChild
+                            className="hover:bg-white/10 active:bg-white/15"
+                        >
                             <Link href={route('dashboard')} prefetch>
                                 <AppLogo />
                             </Link>
@@ -135,13 +138,15 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            {/* Content: oranye tengah → merah gelap */}
+            <SidebarContent className="tan-sidebar-content">
                 {navGroups.map((group) => (
                     <NavMain key={group.label} label={group.label} items={group.items} />
                 ))}
             </SidebarContent>
 
-            <SidebarFooter>
+            {/* Footer: merah gelap terbawah */}
+            <SidebarFooter className="tan-sidebar-footer">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -1,0 +1,98 @@
+/* TAN Logistik Brand Theme
+   Primary: Orange (#F47B1A) - main brand orange
+   Secondary: Deep Red (#8B1A00) - dark red accent
+   Accent: Gold (#F5A623) - warm gold
+*/
+
+@layer base {
+  :root {
+    /* Brand Colors */
+    --tan-orange: 27 91% 53%;          /* #F47B1A */
+    --tan-orange-light: 32 95% 63%;    /* #F5A43A */
+    --tan-orange-dark: 22 88% 43%;     /* #C85D0A */
+    --tan-red: 10 90% 28%;             /* #8B1A00 */
+    --tan-red-dark: 8 85% 20%;         /* #611200 */
+    --tan-gold: 38 90% 55%;            /* #F5A623 */
+
+    /* Semantic Mapping */
+    --background: 40 20% 98%;          /* Warm white */
+    --foreground: 20 15% 12%;          /* Near black with warm tint */
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 15% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 15% 12%;
+
+    --primary: 27 91% 53%;             /* TAN Orange */
+    --primary-foreground: 0 0% 100%;   /* White text on orange */
+
+    --secondary: 38 30% 92%;           /* Warm light orange-tinted gray */
+    --secondary-foreground: 20 15% 15%;
+
+    --muted: 38 20% 94%;
+    --muted-foreground: 20 10% 45%;
+
+    --accent: 38 90% 55%;              /* Gold accent */
+    --accent-foreground: 20 15% 12%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 27 91% 53%;                /* Orange ring */
+
+    --radius: 0.5rem;
+
+    /* Sidebar - Deep warm dark */
+    --sidebar: 18 25% 13%;             /* Dark brown-black */
+    --sidebar-foreground: 38 25% 90%;  /* Warm light */
+    --sidebar-primary: 27 91% 53%;     /* Orange */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 18 30% 20%;      /* Slightly lighter dark */
+    --sidebar-accent-foreground: 38 90% 65%; /* Orange-gold */
+    --sidebar-border: 18 20% 22%;
+    --sidebar-ring: 27 91% 53%;
+  }
+
+  .dark {
+    --background: 18 20% 8%;
+    --foreground: 38 20% 92%;
+
+    --card: 18 20% 11%;
+    --card-foreground: 38 20% 92%;
+
+    --popover: 18 20% 11%;
+    --popover-foreground: 38 20% 92%;
+
+    --primary: 27 91% 58%;             /* Slightly brighter orange in dark */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 18 20% 18%;
+    --secondary-foreground: 38 20% 85%;
+
+    --muted: 18 20% 16%;
+    --muted-foreground: 30 10% 55%;
+
+    --accent: 38 85% 55%;
+    --accent-foreground: 18 20% 8%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 18 20% 20%;
+    --input: 18 20% 20%;
+    --ring: 27 91% 58%;
+
+    /* Sidebar dark mode */
+    --sidebar: 18 25% 8%;
+    --sidebar-foreground: 38 20% 88%;
+    --sidebar-primary: 27 91% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 18 25% 15%;
+    --sidebar-accent-foreground: 38 85% 65%;
+    --sidebar-border: 18 20% 16%;
+    --sidebar-ring: 27 91% 58%;
+  }
+}
