@@ -1,7 +1,6 @@
 /* ============================================
-   TAN Logistik — Premium Orange Theme
-   Terinspirasi logo PT. Trans Anugerah Nusa
-   #FF8C00 → #D94400 → #8B2200
+   TAN Logistik — Elegant Orange Theme v4
+   PT. Trans Anugerah Nusa
    ============================================ */
 
 /* ── CSS VARIABLES ── */
@@ -19,191 +18,226 @@
   --ring:                       25 95% 53%;
 }
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════════════
    SIDEBAR
-══════════════════════════════════════════ */
+══════════════════════════════════════ */
 
-/* Wrapper = gradasi oranye penuh */
 [data-slot="sidebar-wrapper"] {
   background: linear-gradient(170deg, #FF8C00 0%, #D94400 42%, #8B2200 100%) !important;
 }
-
-/* Inner sidebar transparan agar gradasi wrapper tembus */
 [data-sidebar="sidebar"] {
   background: transparent !important;
-  /* Subtle diagonal line texture agar tidak terlalu flat */
   background-image: repeating-linear-gradient(
     135deg,
-    rgba(0,0,0,0.03) 0px,
-    rgba(0,0,0,0.03) 1px,
-    transparent 1px,
-    transparent 12px
+    rgba(0,0,0,0.025) 0px, rgba(0,0,0,0.025) 1px,
+    transparent 1px, transparent 14px
   ) !important;
 }
-
-/* Header sidebar — logo area, sedikit lebih terang */
 [data-slot="sidebar-header"] {
-  background: rgba(255, 255, 255, 0.10) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18) !important;
-  backdrop-filter: blur(2px);
+  background: rgba(255,255,255,0.10) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.18) !important;
 }
-
-/* Footer sidebar — user area, sedikit lebih gelap */
 [data-slot="sidebar-footer"] {
-  background: rgba(0, 0, 0, 0.22) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(0,0,0,0.22) !important;
+  border-top: 1px solid rgba(255,255,255,0.12) !important;
 }
-
-/* Group label — uppercase tracking lebar */
 [data-slot="sidebar-group-label"] {
-  color: rgba(255, 255, 255, 0.42) !important;
+  color: rgba(255,255,255,0.42) !important;
   font-size: 9.5px !important;
   letter-spacing: 0.12em !important;
   text-transform: uppercase !important;
   font-weight: 700 !important;
-  margin-bottom: 2px;
 }
-
-/* Menu button default */
 [data-slot="sidebar-menu-button"] {
-  color: rgba(255, 255, 255, 0.80) !important;
+  color: rgba(255,255,255,0.80) !important;
   border-radius: 8px !important;
   transition: all 0.15s ease !important;
 }
 [data-slot="sidebar-menu-button"]:hover {
-  background-color: rgba(255, 255, 255, 0.13) !important;
+  background-color: rgba(255,255,255,0.12) !important;
   color: white !important;
   transform: translateX(2px);
 }
-/* Active item — pill putih elegan */
 [data-slot="sidebar-menu-button"][data-active="true"] {
-  background: rgba(255, 255, 255, 0.20) !important;
+  background: rgba(255,255,255,0.20) !important;
   color: white !important;
   font-weight: 600 !important;
   box-shadow: 0 1px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15) !important;
-  border-left: 3px solid rgba(255,255,255,0.7) !important;
+  border-left: 3px solid rgba(255,255,255,0.75) !important;
 }
-
-/* SVG icons */
-[data-slot="sidebar-menu-button"] svg {
-  color: rgba(255, 255, 255, 0.65) !important;
-}
+[data-slot="sidebar-menu-button"] svg { color: rgba(255,255,255,0.65) !important; }
 [data-slot="sidebar-menu-button"]:hover svg,
-[data-slot="sidebar-menu-button"][data-active="true"] svg {
-  color: white !important;
+[data-slot="sidebar-menu-button"][data-active="true"] svg { color: white !important; }
+[data-slot="sidebar-separator"] { background-color: rgba(255,255,255,0.12) !important; }
+[data-sidebar="rail"]:hover::after { background-color: rgba(255,255,255,0.3) !important; }
+[data-sidebar="trigger"] { color: #ea580c !important; }
+[data-sidebar="trigger"]:hover { background-color: #fff7ed !important; color: #c2410c !important; }
+[data-slot="sidebar-content"]::-webkit-scrollbar { width: 3px; }
+[data-slot="sidebar-content"]::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2); border-radius: 2px;
 }
-
-/* Separator */
-[data-slot="sidebar-separator"] {
-  background-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-/* Rail */
-[data-sidebar="rail"]:hover::after {
-  background-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Mobile */
 [data-sidebar="sidebar"][data-mobile="true"] {
   background: linear-gradient(170deg, #FF8C00 0%, #D94400 42%, #8B2200 100%) !important;
 }
 
-/* Tooltip collapsed */
+/* ══════════════════════════════════════
+   CONTENT AREA
+══════════════════════════════════════ */
+
+[data-slot="sidebar-inset"] {
+  background-color: #f8f7f5 !important;
+}
+
+/* Accent bar oranye 4px di paling atas */
+[data-slot="sidebar-inset"]::before {
+  content: '';
+  display: block;
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #FF8C00 0%, #D94400 50%, #8B2200 100%);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+[data-slot="sidebar-inset"] > header {
+  background: white !important;
+  border-bottom: 1px solid #fde8d0 !important;
+  box-shadow: 0 2px 8px rgba(234,88,12,0.05) !important;
+}
+
+/* ══════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════ */
+[data-slot="breadcrumb-page"] { color: #ea580c !important; font-weight: 600 !important; }
+[data-slot="breadcrumb-link"] { color: #9ca3af !important; transition: color 0.15s; }
+[data-slot="breadcrumb-link"]:hover { color: #ea580c !important; }
+[data-slot="breadcrumb-separator"] svg { color: #d1d5db !important; }
+
+/* ══════════════════════════════════════
+   TABLE
+══════════════════════════════════════ */
+table { border-collapse: separate !important; border-spacing: 0 !important; }
+thead tr {
+  background: linear-gradient(90deg, #fff7ed 0%, #fafaf8 100%) !important;
+}
+thead th {
+  color: #9a3412 !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.09em !important;
+  text-transform: uppercase !important;
+  border-bottom: 2px solid #fed7aa !important;
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+}
+tbody tr {
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+  border-bottom: 1px solid #f3f4f6 !important;
+}
+tbody tr:hover {
+  background: linear-gradient(90deg, #fff7ed 0%, #fefefe 80%) !important;
+  box-shadow: inset 3px 0 0 #f97316 !important;
+}
+
+/* ══════════════════════════════════════
+   CARD
+══════════════════════════════════════ */
+[data-slot="card"] {
+  border-color: #fde8d0 !important;
+  border-left: 3px solid #f97316 !important;
+  box-shadow: 0 1px 6px rgba(234,88,12,0.07) !important;
+  background: white !important;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+[data-slot="card"]:hover {
+  box-shadow: 0 4px 16px rgba(234,88,12,0.12) !important;
+  transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════
+   DROPDOWN MENU
+══════════════════════════════════════ */
+[data-slot="dropdown-menu-content"] {
+  border: 1px solid #fde8d0 !important;
+  box-shadow: 0 8px 24px rgba(194,65,12,0.12), 0 2px 8px rgba(194,65,12,0.08) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+/* Top accent bar di dropdown */
+[data-slot="dropdown-menu-content"]::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, #FF8C00, #D94400);
+  width: 100%;
+}
+
+/* ══════════════════════════════════════
+   INPUT & SELECT
+══════════════════════════════════════ */
+[data-slot="input"]:focus-visible {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.15) !important;
+}
+[data-slot="select-trigger"]:focus-visible,
+[data-slot="select-trigger"][data-state="open"] {
+  border-color: #f97316 !important;
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.15) !important;
+}
+
+/* ══════════════════════════════════════
+   TOOLTIP
+══════════════════════════════════════ */
 [data-slot="tooltip-content"] {
   background-color: #c2410c !important;
   color: white !important;
   font-weight: 500 !important;
+  font-size: 12px !important;
+  border-radius: 6px !important;
 }
 
+/* ══════════════════════════════════════
+   PATCH v4.1 — Fix inconsistencies
+══════════════════════════════════════ */
 
-/* ══════════════════════════════════════════
-   CONTENT AREA (area putih kanan)
-══════════════════════════════════════════ */
-
-/* Inset content area — warm off-white, tidak plain putih dingin */
-[data-slot="sidebar-inset"] {
-  background-color: #fafaf9 !important;
+/* Fix warna teks yang masih ungu/violet — paksa ke oranye TAN */
+* {
+  --tw-text-opacity: 1;
 }
-
-/* Header konten — border bawah oranye tipis + putih bersih */
-[data-slot="sidebar-inset"] > header,
-header.flex.h-16 {
-  background: white !important;
-  border-bottom: 2px solid #ffedd5 !important;
-  box-shadow: 0 1px 4px rgba(234, 88, 12, 0.06) !important;
-}
-
-/* Sidebar trigger di header konten */
-[data-sidebar="trigger"] {
+.text-purple-600, .text-violet-600, .text-purple-500, .text-violet-500,
+[class*="text-purple"], [class*="text-violet"] {
   color: #ea580c !important;
 }
-[data-sidebar="trigger"]:hover {
-  background-color: #fff7ed !important;
-  color: #c2410c !important;
+
+/* Stats highlighted card (Maintenance aktif) — konsisten oranye */
+[data-slot="card"].bg-amber-50,
+[data-slot="card"].bg-yellow-50,
+[data-slot="card"][class*="bg-amber"],
+[data-slot="card"][class*="bg-yellow"] {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%) !important;
+  border-left-color: #f97316 !important;
 }
 
-
-/* ══════════════════════════════════════════
-   BREADCRUMB
-══════════════════════════════════════════ */
-[data-slot="breadcrumb-page"] {
-  color: #ea580c !important;
-  font-weight: 600 !important;
-}
-[data-slot="breadcrumb-link"] {
-  color: #9ca3af !important;
-}
-[data-slot="breadcrumb-link"]:hover {
+/* Stats card "active/highlighted" label color */
+[data-slot="card"] [class*="text-amber"],
+[data-slot="card"] [class*="text-yellow"] {
   color: #ea580c !important;
 }
-/* Separator chevron */
-[data-slot="breadcrumb-separator"] svg {
-  color: #d1d5db !important;
+
+/* Filter Periode button — lebih tegas */
+button[class*="outline"], 
+[data-slot="button"][class*="outline"] {
+  border-width: 1.5px !important;
 }
 
-
-/* ══════════════════════════════════════════
-   TABLE — Header tabel aksen oranye subtle
-══════════════════════════════════════════ */
-thead tr,
-.table-header-group tr {
-  background: linear-gradient(90deg, #fff7ed 0%, #ffffff 100%) !important;
-  border-bottom: 2px solid #fed7aa !important;
-}
-thead th,
-th[scope="col"] {
-  color: #9a3412 !important;
-  font-weight: 700 !important;
-  font-size: 11px !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-}
-/* Row hover */
-tbody tr:hover {
-  background-color: #fff7ed !important;
-  transition: background 0.12s ease;
+/* Reset button — subtle styling */
+button:has(+ [data-slot="button"]) {
+  color: #9ca3af;
 }
 
-
-/* ══════════════════════════════════════════
-   CARD — slight warm shadow
-══════════════════════════════════════════ */
-[data-slot="card"] {
-  box-shadow: 0 1px 8px rgba(234, 88, 12, 0.07), 0 0 0 1px rgba(234, 88, 12, 0.06) !important;
-  border-color: #ffedd5 !important;
-}
-
-
-/* ══════════════════════════════════════════
-   SCROLLBAR — branded oranye tipis
-══════════════════════════════════════════ */
-[data-slot="sidebar-content"]::-webkit-scrollbar {
-  width: 4px;
-}
-[data-slot="sidebar-content"]::-webkit-scrollbar-track {
-  background: transparent;
-}
-[data-slot="sidebar-content"]::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.25);
-  border-radius: 2px;
+/* Total Biaya & angka penting — oranye bukan ungu */
+[class*="text-primary"] {
+  color: #ea580c !important;
 }
