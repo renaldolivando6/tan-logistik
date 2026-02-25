@@ -1,67 +1,51 @@
-# --- STAGE 1: Build Assets (Node.js + PHP 8.3 untuk Wayfinder) ---
-FROM node:20-alpine AS assets-builder
+# --- STAGE 1: The Builder (PHP + Node.js + Composer) ---
+FROM php:8.2-fpm-alpine AS builder
 WORKDIR /app
 
-# Menggunakan php83 karena ini versi standar di Alpine terbaru
-# Menambahkan repositori 'community' agar paket pasti ditemukan
-RUN apk add --no-cache \
-    php83 \
-    php83-phar \
-    php83-iconv \
-    php83-mbstring \
-    php83-openssl \
-    php83-tokenizer \
-    php83-xml \
-    php83-ctype \
-    php83-dom \
-    php83-curl \
-    php83-session
+# 1. Install Node.js, NPM, dan kebutuhan OS
+RUN apk add --no-cache nodejs npm zip unzip libpng-dev libzip-dev icu-dev oniguruma-dev
 
-# Buat symlink agar perintah 'php' mengarah ke php83
-RUN ln -s /usr/bin/php83 /usr/bin/php
+# 2. Install Ekstensi PHP wajib Laravel
+RUN docker-php-ext-install pdo_mysql bcmath gd zip intl mbstring
 
-# Copy package files dan install dependencies Node
+# 3. Siapkan Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 4. Copy file manifest dependencies
+COPY composer.json composer.lock* ./
 COPY package*.json ./
+
+# 5. KUNCI UTAMA: Install vendor PHP DULU agar Laravel bisa hidup saat di-build
+RUN composer install --no-dev --no-scripts --prefer-dist
+
+# 6. Install Node Modules
 RUN npm install
 
-# Copy seluruh project
+# 7. Copy seluruh kode project
 COPY . .
 
-# Wayfinder butuh membaca config, kita siapkan .env sementara
+# 8. Pancing Wayfinder dengan .env sementara
 RUN cp .env.example .env
+RUN composer dump-autoload --optimize
 
-# Jalankan build assets (Vite)
+# 9. SEKARANG JALANKAN VITE BUILD (Wayfinder pasti tersenyum melihat vendor sudah ada)
 RUN npm run build
 
-# --- STAGE 2: PHP Application (Production Image menggunakan PHP 8.2) ---
+
+# --- STAGE 2: Production Image (Bersih & Ringan) ---
 FROM php:8.2-fpm-alpine
 WORKDIR /var/www/html
 
-# Install system dependencies untuk PHP Extensions di Alpine
-RUN apk add --no-cache \
-    libpng-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    icu-dev \
-    oniguruma-dev
+# Install kebutuhan OS untuk Production
+RUN apk add --no-cache libpng-dev libzip-dev icu-dev oniguruma-dev
 
-# Install PHP extensions wajib untuk Laravel 12
+# Install Ekstensi PHP
 RUN docker-php-ext-install pdo_mysql bcmath gd zip intl mbstring
 
-# Ambil Composer terbaru
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# COPY SEMUANYA DARI STAGE 1 (Kode, Vendor, dan Hasil Build React)
+COPY --from=builder /app /var/www/html
 
-# Copy seluruh file project
-COPY . .
-
-# AMBIL HASIL BUILD: Copy folder public/build dari STAGE 1
-COPY --from=assets-builder /app/public/build ./public/build
-
-# Install dependencies PHP (Production mode)
-RUN composer install --no-dev --optimize-autoloader
-
-# Atur hak akses folder storage dan cache
+# Atur izin folder agar Laravel bisa menyimpan log
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 9000
