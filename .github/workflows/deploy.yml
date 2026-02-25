@@ -1,0 +1,53 @@
+name: Deploy Trans Anugerah Nusa (Laravel Inertia)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: sungaibudiwebdev/trans-anugerah-nusa:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Send Command via SSM
+        run: |
+          B64_COMPOSE=$(base64 -w 0 docker-compose.yml)
+          B64_NGINX=$(base64 -w 0 docker/nginx/default.conf)
+
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --instance-ids "${{ secrets.SSM_INSTANCE_ID_LINUX }}" \
+            --parameters "commands=[
+              \"mkdir -p /opt/apps/rere-apps/trans-nusa/docker/nginx\",
+              \"cd /opt/apps/rere-apps/trans-nusa\",
+              \"echo $B64_COMPOSE | base64 -d > docker-compose.yml\",
+              \"echo $B64_NGINX | base64 -d > docker/nginx/default.conf\",
+              \"sudo docker compose pull\",
+              \"sudo docker compose up -d --force-recreate\"
+            ]" \
+            --region "${{ secrets.AWS_REGION }}"

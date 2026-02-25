@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # --- Aplikasi Laravel ---
+  trans-nusa-app:
+    image: sungaibudiwebdev/trans-anugerah-nusa:latest
+    container_name: trans-nusa-app
+    restart: unless-stopped
+    depends_on:
+      - trans-nusa-db
+    volumes:
+      - .env:/var/www/html/.env
+      - ./storage:/var/www/html/storage
+    networks:
+      - web-network      # Jalur ke Satpam Nginx
+      - trans-nusa-internal # Jalur ke Database sendiri
+
+  # --- Database Mandiri ---
+  trans-nusa-db:
+    image: mysql:8.0
+    container_name: trans-nusa-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./mysql_data:/var/lib/mysql # <--- INI KUNCINYA: Data aman di sini!
+    networks:
+      - trans-nusa-internal
+
+networks:
+  web-network:
+    external: true
+  trans-nusa-internal:
+    driver: bridge
