@@ -1,32 +1,31 @@
-# --- STAGE 1: Build Assets (Node.js + Minimal PHP for Wayfinder) ---
+# --- STAGE 1: Build Assets (Node.js + PHP 8.3) ---
 FROM node:20-alpine AS assets-builder
 WORKDIR /app
 
-# Install PHP minimal & dependencies yang dibutuhkan Alpine agar Wayfinder bisa jalan
+# Menggunakan php83 dan menambahkan repository community agar pasti ketemu
 RUN apk add --no-cache \
-    php82 \
-    php82-phar \
-    php82-iconv \
-    php82-mbstring \
-    php82-openssl \
-    php82-tokenizer \
-    php82-xml \
-    php82-ctype
+    php83 \
+    php83-phar \
+    php83-iconv \
+    php83-mbstring \
+    php83-openssl \
+    php83-tokenizer \
+    php83-xml \
+    php83-ctype \
+    php83-dom \
+    php83-curl
 
-# Buat symlink agar perintah 'php' bisa dikenali oleh plugin Vite/Wayfinder
-RUN ln -s /usr/bin/php82 /usr/bin/php
+# Buat symlink ke php83 (penting!)
+RUN ln -s /usr/bin/php83 /usr/bin/php
 
-# Copy package files dan install dependencies Node
 COPY package*.json ./
 RUN npm install
 
-# Copy seluruh project (butuh file php artisan dkk untuk build step)
 COPY . .
 
-# Wayfinder seringkali butuh membaca config, kita siapkan .env sementara
+# Siapkan .env sementara untuk Wayfinder
 RUN cp .env.example .env
 
-# Jalankan build assets (Vite)
 RUN npm run build
 
 # --- STAGE 2: PHP Application (Production Image) ---
