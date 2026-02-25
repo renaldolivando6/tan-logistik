@@ -27,6 +27,10 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+        # --- TAMBAHKAN STEP INI AGAR ROBOT MENGAMBIL FILE REPO ---
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
