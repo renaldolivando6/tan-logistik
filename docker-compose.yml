@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # --- Aplikasi Laravel ---
+  # 1. Koki (Aplikasi PHP)
   trans-nusa-app:
     image: sungaibudiwebdev/trans-anugerah-nusa:latest
     container_name: trans-nusa-app
@@ -11,11 +11,25 @@ services:
     volumes:
       - .env:/var/www/html/.env
       - ./storage:/var/www/html/storage
+      - app-code:/var/www/html # <-- Share file ke Pelayan
     networks:
-      - web-network      # Jalur ke Satpam Nginx
-      - trans-nusa-internal # Jalur ke Database sendiri
+      - trans-nusa-internal
 
-  # --- Database Mandiri ---
+  # 2. Pelayan (Internal Nginx) - KITA TAMBAH INI!
+  trans-nusa-web:
+    image: nginx:alpine
+    container_name: trans-nusa-web
+    restart: unless-stopped
+    depends_on:
+      - trans-nusa-app
+    volumes:
+      - app-code:/var/www/html # <-- Baca file dari Koki
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - web-network       # <-- Jalur khusus untuk Satpam Depan
+      - trans-nusa-internal
+
+  # 3. Database Mandiri
   trans-nusa-db:
     image: mysql:8.0
     container_name: trans-nusa-db
@@ -24,9 +38,13 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./mysql_data:/var/lib/mysql # <--- INI KUNCINYA: Data aman di sini!
+      - ./mysql_data:/var/lib/mysql
     networks:
       - trans-nusa-internal
+
+# Wadah untuk sharing file Koki & Pelayan
+volumes:
+  app-code: 
 
 networks:
   web-network:
